@@ -20,7 +20,6 @@ def artist_search():
 	print("")
 	for group in r1_json['torrentgroup']:
 		print("Album name: " + group['groupName'])
-		print("Album ID: " + str(group['groupId']))
 		print("")
 
 def album_search():
@@ -63,10 +62,11 @@ def user_stats():
     print("Messages........." + str(r1_json['notifications']['messages']))
 
 if sys.argv[1] == "search":
-    if len(sys.argv[3]) > 0:
-        album_search()
-    else:
-        artist_search()
+	try:
+		if len(sys.argv[3]) > 0:
+			album_search()
+	except:
+		artist_search()
 if sys.argv[1] == "stats":
     user_stats()
 if sys.argv[1] == "download":
