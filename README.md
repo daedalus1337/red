@@ -1,4 +1,4 @@
-# red
+# red search tool
 
 
 Disclaimer: this is the first code I have ever shared with anyone.  I’m sure it can be done better by someone with more experience, but it does fit my individual needs.  Suggestions are more than welcome, although I don’t know if I’ll have time to improve this though.  Anyway…
