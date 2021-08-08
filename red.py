@@ -73,6 +73,7 @@ def album_search():
 						print("Torrent ID: " + str(release['id']))
 						print("Media: " + release['media'])
 						print("Size: " + str(sizeof_fmt(release['size'])))
+						print("Files: " + str(release['fileCount']))
 						print("Seeders: " + str(release['seeders']))
 						print("")
 		else:
