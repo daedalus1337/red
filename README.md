@@ -16,7 +16,7 @@ usage:
 1. search
 	1. Artist search:
 
-	In order to search, just run `[red.py](http://red.py) search ARTIST_NAME`.  It will return a list of album names.
+	In order to search, just run `red.py search ARTIST_NAME`.  It will return a list of album names.
 
 
 	1. Album search:
