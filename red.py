@@ -7,36 +7,21 @@ import requests
 url = "https://redacted.ch/ajax.php?"
 header = {"Authorization": key.api_key}
 
-def release_type(x):
-	if x == 1:
-		x = "Album"
-	elif x == 3:
-		x = "Soundtrack"
-	elif x == 5:
-		x = "EP"
-	elif x == 6:
-		x = "Anthology"
-	elif x == 7:
-		x = "Compilation"
-	elif x == 9:
-		x = "Single"
-	elif x == 11:
-		x = "Live Album"
-	elif x == 13:
-		x = "Remix"
-	elif x == 14:
-		x = "Bootleg"
-	elif x == 17:
-		x = "Demo"
-	elif x == 18:
-		x = "Concert Recording"
-	elif x == 1022:
-		x = "Composition"
-	elif x == 1024:
-		x = "Guest Appearance"
-	else:
-		x = "N/A"
-	return x
+releases = {
+	1: "Album",
+	3: "Soundtrack",
+	5: "EP",
+	6: "Anthology",
+	7: "Compilation",
+	9: "Single",
+	11: "Live Album",
+	13: "Reminx",
+	14: "Bootleg",
+	17: "Demo",
+	18: "Concert Recording",
+	1022: "Composition",
+	1024: "Guest Appearance"
+}
 
 def sizeof_fmt(num, suffix='B'):
 	for unit in ['','K','M','G','T','P','E','Z']:
@@ -53,7 +38,7 @@ def artist_search():
 	print("")
 	for group in r1_json['torrentgroup']:
 		print("Album name: " + group['groupName'])
-		print("Release type: " + str(release_type(group['releaseType'])))
+		print("Release type: " + releases[group['releaseType']])
 		print("")
 
 def album_search():
@@ -82,7 +67,7 @@ def album_search():
 def torrent_download():
 	torrentID = {"action": "download", "id": sys.argv[2]}
 	r1 = requests.get(url, params=torrentID, headers=header)
-	open('file.torrent', 'wb').write(r1.content)
+	open('/file.torrent', 'wb').write(r1.content)
 
 def user_stats():
     stats = {"action": "index"}
