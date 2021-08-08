@@ -1,3 +1,5 @@
+#!/usr/local/bin/python3
+
 import sys
 import requests
 
@@ -13,7 +15,7 @@ def sizeof_fmt(num, suffix='B'):
 	return "%.1f%s%s" % (num, 'Yi', suffix)
 
 def artist_search():
-	artist = {"action": "artist", "artistname": sys.argv[2]}
+	artist = {"action": "artist", "artistname": str(sys.argv[2]).lower()}
 	r1 = requests.get(url, params=artist, headers=header)
 	r1_json = r1.json()['response']
 
@@ -23,11 +25,11 @@ def artist_search():
 		print("")
 
 def album_search():
-	artist = {"action": "artist", "artistname": sys.argv[2]}
+	artist = {"action": "artist", "artistname": str(sys.argv[2]).lower()}
 	r1 = requests.get(url, params=artist, headers=header)
 	r1_json = r1.json()['response']
 	for group in r1_json['torrentgroup']:
-		if group['groupName'].lower() == sys.argv[3]:
+		if group['groupName'].lower() == str(sys.argv[3]).lower():
 			album = {"action": "torrentgroup", "id": str(group['groupId'])}
 			r2 = requests.get(url, params=album, headers=header)
 			r2_json = r2.json()['response']
@@ -61,13 +63,13 @@ def user_stats():
     print("Download........." + str(sizeof_fmt(r1_json['userstats']['downloaded'])))
     print("Messages........." + str(r1_json['notifications']['messages']))
 
-if sys.argv[1] == "search":
+if str(sys.argv[1]).lower() == "search":
 	try:
 		if len(sys.argv[3]) > 0:
 			album_search()
 	except:
 		artist_search()
-if sys.argv[1] == "stats":
+if str(sys.argv[1]).lower() == "stats":
     user_stats()
-if sys.argv[1] == "download":
+if str(sys.argv[1]).lower() == "download":
 	torrent_download()
