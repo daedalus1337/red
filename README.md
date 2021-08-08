@@ -16,11 +16,11 @@ usage:
 1. search
 	1. Artist search:
 
-	In order to search, just run `red.py search ARTIST_NAME`.  It will return a list of album names.
+	In order to search, just run `red.py search ARTIST_NAME`.  It will return a list of album names.  Multi-word artist and album names need to be enclosed in quotes!
 
 
 	1. Album search:
-		2. To search for an album, run `red.py search ARTIST_NAME ALBUM_NAME`.  It will then list the torrent Id, media type (CD, web, etc.), size, and amount of seeders of each available download. It will also make a note if the torrent is 24-bit.
+		2. To search for an album, run `red.py search ARTIST_NAME ALBUM_NAME`.  It will then list the torrent Id, media type (CD, web, etc.), size, and amount of seeders of each available download. It will also make a note if the torrent is 24-bit.  Multi-word artist and album names need to be enclosed in quotes!
 2. download
 	1. I built this function on the idea that I would have done an album search before.  After you retrieve the torrent ID from the album search, run `red.py download TORRENT_ID`
 3. stats
