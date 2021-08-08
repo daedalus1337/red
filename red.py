@@ -1,11 +1,42 @@
-#!/usr/local/bin/python3
+#!/usr/bin/env python3
 
+import key
 import sys
 import requests
 
-apikey = "INSERT_API_KEY"
 url = "https://redacted.ch/ajax.php?"
-header = {"Authorization": apikey}
+header = {"Authorization": key.api_key}
+
+def release_type(x):
+	if x == 1:
+		x = "Album"
+	elif x == 3:
+		x = "Soundtrack"
+	elif x == 5:
+		x = "EP"
+	elif x == 6:
+		x = "Anthology"
+	elif x == 7:
+		x = "Compilation"
+	elif x == 9:
+		x = "Single"
+	elif x == 11:
+		x = "Live Album"
+	elif x == 13:
+		x = "Remix"
+	elif x == 14:
+		x = "Bootleg"
+	elif x == 17:
+		x = "Demo"
+	elif x == 18:
+		x = "Concert Recording"
+	elif x == 1022:
+		x = "Composition"
+	elif x == 1024:
+		x = "Guest Appearance"
+	else:
+		x = "N/A"
+	return x
 
 def sizeof_fmt(num, suffix='B'):
 	for unit in ['','K','M','G','T','P','E','Z']:
@@ -22,6 +53,7 @@ def artist_search():
 	print("")
 	for group in r1_json['torrentgroup']:
 		print("Album name: " + group['groupName'])
+		print("Release type: " + str(release_type(group['releaseType'])))
 		print("")
 
 def album_search():
