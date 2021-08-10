@@ -16,7 +16,7 @@ releases = {
 	7: "Compilation",
 	9: "Single",
 	11: "Live Album",
-	13: "Reminx",
+	13: "Remix",
 	14: "Bootleg",
 	17: "Demo",
 	18: "Concert Recording",
