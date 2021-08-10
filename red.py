@@ -7,6 +7,7 @@ import requests
 url = "https://redacted.ch/ajax.php?"
 header = {"Authorization": key.api_key}
 
+#incomplete.  API only provides integer, so I'm stuck having to manually add these as I identify them.
 releases = {
 	1: "Album",
 	3: "Soundtrack",
@@ -56,6 +57,7 @@ def album_search():
 						if release['encoding'] == '24bit Lossless':
 							print("***THIS IS A 24-BIT RELEASE***")
 						print("Torrent ID: " + str(release['id']))
+						print("Group ID: " + str(group['groupId']))
 						print("Media: " + release['media'])
 						print("Size: " + str(sizeof_fmt(release['size'])))
 						print("Files: " + str(release['fileCount']))
@@ -67,7 +69,17 @@ def album_search():
 def torrent_download():
 	torrentID = {"action": "download", "id": sys.argv[2]}
 	r1 = requests.get(url, params=torrentID, headers=header)
-	open('/file.torrent', 'wb').write(r1.content)
+	try:
+		if len(sys.argv[3]) > 0:
+			groupID = {"action": "torrentgroup", "id": sys.argv[3]}
+			r2 = requests.get(url, params=groupID, headers=header)
+			r2_json = r2.json()['response']
+			album = str((r2_json['group']['name']))
+			artist = str((r2_json['group']['musicInfo']['artists'][0]['name']))
+			open(artist + " - " + album + '.torrent', 'wb').write(r1.content)
+	except:
+		open('file.torrent', 'wb').write(r1.content)
+		print("test")
 
 def user_stats():
     stats = {"action": "index"}
