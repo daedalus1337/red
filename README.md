@@ -9,7 +9,7 @@ Here's how it works:
 
 setup:
 
-In the same directory as the script, you will need a separate file called `key.py`.  In that file simply add `api_key="YOUR_API_KEY_HERE"`.  It needs to be a string, so keep it in the quotes.  On line 70, you can add the path and/or change the filename to something you can identify.  Eventually, I'll update this so it automatically saves the file as artist-album.torrent, but for my own use, that function is irrelevant.
+In the same directory as the script, you will need a separate file called `key.py`.  In that file simply add `api_key="YOUR_API_KEY_HERE"`.  It needs to be a string, so keep it in the quotes.  On line 81, you can add the path and/or change the filename to something you can identify.  Eventually, I'll update this so it automatically saves the file as artist-album.torrent, but for my own use, that function is irrelevant.
 
 usage:
 
