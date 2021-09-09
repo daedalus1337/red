@@ -3,6 +3,8 @@
 import key
 import sys
 import requests
+import html
+
 
 url = "https://redacted.ch/ajax.php?"
 header = {"Authorization": key.api_key}
@@ -39,7 +41,7 @@ def artist_search():
 
 	print("")
 	for group in r1_json['torrentgroup']:
-		print("Album name: " + group['groupName'])
+		print("Album name: " + html.unescape(group['groupName']))
 		print("Release type: " + releases[group['releaseType']])
 		print("")
 
