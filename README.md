@@ -3,7 +3,7 @@
 
 Disclaimer: this is the first code I have ever shared with anyone.  I’m sure it can be done better by someone with more experience, but it does fit my individual needs.  Suggestions are more than welcome, although I don’t know if I’ll have time to improve this though.  Anyway…
 
-Hello!  I made this command line tool so I didn't have to go to the RED website in order to search for and download torrents.  I personally removed the `.py` extension, then made it executable and added it to PATH so I can type `red search ARTIST_NAME` right into the terminal and get the info I wanted.  Pretty neat in my opinion.  A couple of things to keep in mind are that this will only show FLAC files, and it will NOT show vinyl rips.  This can be changed, but those were two solid parameters that I never deviate from, so I didn't see why I shouldn't hardcode them.
+Hello!  I made this command line tool so I didn't have to go to the RED website in order to search for and download torrents.  I personally set up an alias so I can type `red search ARTIST_NAME` right into the terminal and get the info I wanted.  Pretty neat in my opinion.  A couple of things to keep in mind are that this will only show FLAC files, and it will NOT show vinyl rips.  This can be changed, but those were two solid parameters that I never deviate from, so I didn't see why I shouldn't hardcode them.
 
 Here's how it works:
 
