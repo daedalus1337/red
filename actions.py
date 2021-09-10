@@ -22,6 +22,7 @@ releases = {
 	14: "Bootleg",
 	17: "Demo",
 	18: "Concert Recording",
+	19: "DJ Mix",
 	1022: "Composition",
 	1024: "Guest Appearance"
 }
