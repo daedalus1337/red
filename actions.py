@@ -51,7 +51,7 @@ def album_search():
 	r1 = requests.get(url, params=artist, headers=header)
 	r1_json = r1.json()['response']
 	for group in r1_json['torrentgroup']:
-		if group['groupName'].lower() == str(sys.argv[3]).lower():
+		if html.unescape(group['groupName'].lower()) == str(sys.argv[3]).lower():
 			album = {"action": "torrentgroup", "id": str(group['groupId'])}
 			r2 = requests.get(url, params=album, headers=header)
 			r2_json = r2.json()['response']
