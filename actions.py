@@ -1,13 +1,12 @@
-#!/usr/bin/env python3
-
-import key
-import sys
+from dotenv.main import find_dotenv
 import requests
 import html
+import os
+from dotenv import load_dotenv, find_dotenv
 
-
+load_dotenv(find_dotenv())
 url = "https://redacted.ch/ajax.php?"
-header = {"Authorization": key.api_key}
+header = {"Authorization": os.getenv('KEY')}
 
 #incomplete.  API only provides integer, so I'm stuck having to manually add these as I identify them.
 releases = {
@@ -34,9 +33,9 @@ def sizeof_fmt(num, suffix='B'):
 		num /= 1024.0
 	return "%.1f%s%s" % (num, 'Yi', suffix)
 
-def artist_search():
+def artist_search(artist):
 	""" requires 2 arguments """
-	artist = {"action": "artist", "artistname": str(sys.argv[2]).lower()}
+	artist = {"action": "artist", "artistname": artist}
 	r1 = requests.get(url, params=artist, headers=header)
 	r1_json = r1.json()['response']
 
@@ -46,12 +45,12 @@ def artist_search():
 		print("Release type: " + releases[group['releaseType']])
 		print("")
 
-def album_search():
-	artist = {"action": "artist", "artistname": str(sys.argv[2]).lower()}
+def album_search(artist, album):
+	artist = {"action": "artist", "artistname": artist}
 	r1 = requests.get(url, params=artist, headers=header)
 	r1_json = r1.json()['response']
 	for group in r1_json['torrentgroup']:
-		if html.unescape(group['groupName'].lower()) == str(sys.argv[3]).lower():
+		if html.unescape(group['groupName'].lower()) == album:
 			album = {"action": "torrentgroup", "id": str(group['groupId'])}
 			r2 = requests.get(url, params=album, headers=header)
 			r2_json = r2.json()['response']
@@ -70,20 +69,19 @@ def album_search():
 		else:
 			continue
 
-def torrent_download():
-	torrentID = {"action": "download", "id": sys.argv[2]}
+def torrent_download(tid, gid, fl):
+	torrentID = {"action": "download", "id": tid, "usetoken": fl}
 	r1 = requests.get(url, params=torrentID, headers=header)
 	try:
-		if len(sys.argv[3]) > 0:
-			groupID = {"action": "torrentgroup", "id": sys.argv[3]}
+		if len(gid) > 0:
+			groupID = {"action": "torrentgroup", "id": gid}
 			r2 = requests.get(url, params=groupID, headers=header)
 			r2_json = r2.json()['response']
 			album = str((r2_json['group']['name']))
 			artist = str((r2_json['group']['musicInfo']['artists'][0]['name']))
-			open(artist + " - " + album + '.torrent', 'wb').write(r1.content)
+			open(str(artist) + " - " + str(album) + '.torrent', 'wb').write(r1.content)
 	except:
 		open('file.torrent', 'wb').write(r1.content)
-		print("test")
 
 def user_stats():
     stats = {"action": "index"}
@@ -96,4 +94,3 @@ def user_stats():
     print("Upload..........." + str(sizeof_fmt(r1_json['userstats']['uploaded'])))
     print("Download........." + str(sizeof_fmt(r1_json['userstats']['downloaded'])))
     print("Messages........." + str(r1_json['notifications']['messages']))
-

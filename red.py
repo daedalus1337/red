@@ -1,44 +1,31 @@
 import actions
-import sys
+import argparse
 
-POSSIBLE_ACTIONS = [
-	"search",
-	"stats",
-	"download"
-]
+parser = argparse.ArgumentParser()
+subparsers = parser.add_subparsers(help='Functions')
+parser_1 = subparsers.add_parser('search', help='...')
+parser_1.add_argument('artist', type=str, help='...')
+parser_1.add_argument("album", type=str, help='album', nargs="?")
+parser_1.set_defaults(command="search")
 
-def print_possible_actions():
-	print("Possible actions:")
-	for action in POSSIBLE_ACTIONS:
-		print(action)
+parser_2 = subparsers.add_parser('stats', help='...')
+parser_2.add_argument('stats', action="store_true", help='...')
+parser_2.set_defaults(command="stats")
 
+parser_3 = subparsers.add_parser('download', help='...')
+parser_3.add_argument('torrentid', type=int, help='...')
+parser_3.add_argument('groupid', type=int, help='...', nargs="?")
+parser_3.add_argument("-fl", action="store_true")
+parser_3.set_defaults(command="download")
 
-if len(sys.argv) == 1:
-	print("Usage: python3 red.py <action>")
-	print_possible_actions()
-	sys.exit()
+args = parser.parse_args()
 
-if sys.argv[1] not in POSSIBLE_ACTIONS:
-	print_possible_actions()
-	sys.exit()
-
-action = sys.argv[1].lower()
-
-if action == "search":
-	if len(sys.argv) not in [3, 4]:
-		print(f"Usage: python3 red.py {action} <artist> [<album>]")
-		sys.exit()
-	artist = sys.argv[2].lower()
-	if len(sys.argv) == 3:
-		print(f"Searching for artist: {artist}")
-		actions.artist_search()
-	else:
-		album = sys.argv[3].lower()
-		print(f"Searching for artist: {artist} and album: {album}")
-		actions.album_search()
-
-if str(sys.argv[1]).lower() == "stats":
+if args.command.lower() == "search":
+	if args.album == None:
+		actions.artist_search(args.artist.lower())
+	if args.album != None:
+		actions.album_search(args.artist.lower(), args.album.lower())
+if args.command.lower() == "stats":
     actions.user_stats()
-
-if str(sys.argv[1]).lower() == "download":
-	actions.torrent_download()
+if args.command.lower() == "download":
+	actions.torrent_download(args.torrentid, args.groupid, args.fl)
