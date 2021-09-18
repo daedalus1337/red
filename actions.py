@@ -1,7 +1,7 @@
-from dotenv.main import find_dotenv
 import requests
 import html
 import os
+import sys
 from dotenv import load_dotenv, find_dotenv
 
 load_dotenv(find_dotenv())
@@ -28,6 +28,13 @@ releases = {
 	1024: "Guest Appearance"
 }
 
+def make_request(params):
+	req = requests.get(url, params=params, headers=header)
+	if req.status_code != 200:
+		print(f"Status of request is {req.status_code}. Aborting...")
+		sys.exit()
+	return req
+
 def sizeof_fmt(num, suffix="B"):
 	for unit in ["","K","M","G","T","P","E","Z"]:
 		if abs(num) < 1024.0:
@@ -38,7 +45,7 @@ def sizeof_fmt(num, suffix="B"):
 def artist_search(artist):
 	""" requires 2 arguments """
 	artist = {"action": "artist", "artistname": artist}
-	r1 = requests.get(url, params=artist, headers=header)
+	r1 = make_request(artist)
 	r1_json = r1.json()["response"]
 
 	print("")
@@ -49,7 +56,7 @@ def artist_search(artist):
 
 def album_search(artist, album):
 	artist = {"action": "artist", "artistname": artist}
-	r1 = requests.get(url, params=artist, headers=header)
+	r1 = make_request(artist)
 	r1_json = r1.json()["response"]
 	for group in r1_json["torrentgroup"]:
 		if html.unescape(group["groupName"].lower()) == album:
@@ -77,10 +84,10 @@ def torrent_download(tid, fl):
 	elif fl == True:
 		download_params = {"action": "download", "id": tid, "usetoken": True}
 	details_params = {"action": "torrent", "id": tid}
-	r1 = requests.get(url, params=details_params, headers=header)
+	r1 = make_request(details_params)
 	album = r1.json()["response"]["group"]["name"]
 	artist = str((r1.json()["response"]["group"]["musicInfo"]["artists"][0]["name"]))
-	r2 = requests.get(url, params=download_params, headers=header)
+	r2 = make_request(download_params)
 	open(os.getenv("FILE_DIR") + artist + " - " + album + ".torrent", "wb").write(r2.content)
 
 def user_stats():
