@@ -8,7 +8,7 @@ Here's how it works:
 
 ##setup
 
-In the .env file, there are two variables.  Add your API key and the file path where you want the .torrent files to be downloaded.
+In the .env file, there are two variables.  Add your API key and the file path where you want the torrent files to be downloaded.
 
 ##usage
 
@@ -20,7 +20,7 @@ In the .env file, there are two variables.  Add your API key and the file path w
 	B. Album search:
 		i. To search for an album, run `red.py search ARTIST_NAME ALBUM_NAME`.  It will then list the torrent Id, group ID (album ID), media type (CD, web, etc.), size, and amount of seeders of each available download. It will also make a note if the torrent is 24-bit.  Multi-word artist and album names need to be enclosed in quotes!
 2. download
-	A. I built this function on the idea that I would have done an album search before.  After you retrieve the torrent ID from the album search, run `red.py download TORRENT_ID`.  This API call only returns the file without any naming information, so I added the group ID to the album search, and if you run `red.py download TORRENT_ID GROUP_ID`, it will properly name the file "ARTIST - ALBUM.torrent".  You can also add the `-fl` flag to the end of this command to use a freeleech token. 
+	A. I built this function on the idea that I would have done an album search before.  After you retrieve the torrent ID from the album search, run `red.py download TORRENT_ID`.  This will save the torrent file (artist - album.torrent) to the directory specified in the .env file. You can also add the `-fl` flag to the end of this command to use a freeleech token. 
 3. stats
 	A. run `red.py stats`, and you will see:
 		- Username

@@ -71,19 +71,43 @@ def album_search(artist, album):
 		else:
 			continue
 
-def torrent_download(tid, gid, fl):
-	torrentID = {"action": "download", "id": tid, "usetoken": fl}
-	r1 = requests.get(url, params=torrentID, headers=header)
-	try:
-		if len(gid) > 0:
-			groupID = {"action": "torrentgroup", "id": gid}
-			r2 = requests.get(url, params=groupID, headers=header)
-			r2_json = r2.json()["response"]
-			album = str((r2_json["group"]["name"]))
-			artist = str((r2_json["group"]["musicInfo"]["artists"][0]["name"]))
-			open(os.getenv("FILE_DIR") + artist + " - " + album + ".torrent", "wb").write(r1.content)
-	except:
-		open(os.getenv("FILE_DIR") + "file.torrent", "wb").write(r1.content)
+def torrent_download(tid, fl):
+	details_params = {"action": "torrent", "id": tid}
+	r1 = requests.get(url, params=details_params, headers=header)
+	album = r1.json()["response"]["group"]["name"]
+	artist = str((r1.json()["response"]["group"]["musicInfo"]["artists"][0]["name"]))
+	download_params = {"action": "download", "id": tid, "usetoken": fl}
+	r2 = requests.get(url, params=download_params, headers=header)
+	open(os.getenv("FILE_DIR") + artist + " - " + album + ".torrent", "wb").write(r2.content)
+
+	# try:
+	# 	if len(gid) > 0:
+	# 		groupID = {"action": "torrentgroup", "id": gid}
+	# 		r2 = requests.get(url, params=groupID, headers=header)
+	# 		r2_json = r2.json()["response"]
+	# 		album = str((r2_json["group"]["name"]))
+	# 		artist = str((r2_json["group"]["musicInfo"]["artists"][0]["name"]))
+	# 		open(os.getenv("FILE_DIR") + artist + " - " + album + ".torrent", "wb").write(r1.content)
+	# except:
+	# 	open(os.getenv("FILE_DIR") + "file.torrent", "wb").write(r1.content)
+
+
+# def torrent_download(tid, gid, fl):
+# 	download_params = {"action": "download", "id": tid, "usetoken": fl}
+# 	r1 = requests.get(url, params=download_params, headers=header)
+# 	try:
+# 		if len(gid) > 0:
+# 			groupID = {"action": "torrentgroup", "id": gid}
+# 			r2 = requests.get(url, params=groupID, headers=header)
+# 			r2_json = r2.json()["response"]
+# 			album = str((r2_json["group"]["name"]))
+# 			artist = str((r2_json["group"]["musicInfo"]["artists"][0]["name"]))
+# 			open(os.getenv("FILE_DIR") + artist + " - " + album + ".torrent", "wb").write(r1.content)
+# 	except:
+# 		open(os.getenv("FILE_DIR") + "file.torrent", "wb").write(r1.content)
+
+
+
 
 def user_stats():
     stats = {"action": "index"}

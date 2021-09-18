@@ -28,4 +28,4 @@ if args.command.lower() == "search":
 if args.command.lower() == "stats":
     actions.user_stats()
 if args.command.lower() == "download":
-	actions.torrent_download(args.torrentid, args.groupid, args.fl)
+	actions.torrent_download(args.torrentid, args.fl)
