@@ -45,25 +45,22 @@ def sizeof_fmt(num, suffix="B"):
 def artist_search(artist):
 	""" requires 2 arguments """
 	artist = {"action": "artist", "artistname": artist}
-	r1 = make_request(artist)
-	r1_json = r1.json()["response"]
+	r1 = make_request(artist).json()["response"]
 
 	print("")
-	for group in r1_json["torrentgroup"]:
+	for group in r1["torrentgroup"]:
 		print("Album name: " + html.unescape(group["groupName"]))
 		print("Release type: " + releases[group["releaseType"]])
 		print("")
 
 def album_search(artist, album):
 	artist = {"action": "artist", "artistname": artist}
-	r1 = make_request(artist)
-	r1_json = r1.json()["response"]
-	for group in r1_json["torrentgroup"]:
+	r1 = make_request(artist).json()["response"]
+	for group in r1["torrentgroup"]:
 		if html.unescape(group["groupName"].lower()) == album:
 			album = {"action": "torrentgroup", "id": str(group["groupId"])}
-			r2 = requests.get(url, params=album, headers=header)
-			r2_json = r2.json()["response"]
-			for release in r2_json["torrents"]:
+			r2 = requests.get(url, params=album, headers=header).json()["response"]
+			for release in r2["torrents"]:
 				if release["format"] == "FLAC":
 					if release["media"] != "Vinyl":
 						if release["encoding"] == "24bit Lossless":
@@ -79,10 +76,10 @@ def album_search(artist, album):
 			continue
 
 def torrent_download(tid, fl):
-	if fl == False:
-		download_params = {"action": "download", "id": tid}
-	elif fl == True:
+	if fl == True:
 		download_params = {"action": "download", "id": tid, "usetoken": True}
+	else:
+		download_params = {"action": "download", "id": tid}
 	details_params = {"action": "torrent", "id": tid}
 	r1 = make_request(details_params)
 	album = r1.json()["response"]["group"]["name"]
@@ -92,12 +89,11 @@ def torrent_download(tid, fl):
 
 def user_stats():
     stats = {"action": "index"}
-    r1 = requests.get(url, params=stats, headers=header)
-    r1_json = r1.json()["response"]
-    print("Username........." + r1_json["username"])
-    print("Class............" + r1_json["userstats"]["class"])
-    print("Ratio............" + str(r1_json["userstats"]["ratio"]))
-    print("Required Ratio..." + str(r1_json["userstats"]["requiredratio"]))
-    print("Upload..........." + str(sizeof_fmt(r1_json["userstats"]["uploaded"])))
-    print("Download........." + str(sizeof_fmt(r1_json["userstats"]["downloaded"])))
-    print("Messages........." + str(r1_json["notifications"]["messages"]))
+    r1 = requests.get(url, params=stats, headers=header).json()["response"] 
+    print("Username........." + r1["username"])
+    print("Class............" + r1["userstats"]["class"])
+    print("Ratio............" + str(r1["userstats"]["ratio"]))
+    print("Required Ratio..." + str(r1["userstats"]["requiredratio"]))
+    print("Upload..........." + str(sizeof_fmt(r1["userstats"]["uploaded"])))
+    print("Download........." + str(sizeof_fmt(r1["userstats"]["downloaded"])))
+    print("Messages........." + str(r1["notifications"]["messages"]))
