@@ -6,6 +6,7 @@ subparsers = parser.add_subparsers(help='Functions')
 parser_1 = subparsers.add_parser('search', help='...')
 parser_1.add_argument('artist', type=str, help='...')
 parser_1.add_argument("album", type=str, help='album', nargs="?")
+parser_1.add_argument("-m", help="media type", nargs="+", default=["cd", "web"])
 parser_1.set_defaults(command="search")
 
 parser_2 = subparsers.add_parser('stats', help='...')
@@ -24,7 +25,7 @@ if args.command.lower() == "search":
 	if args.album == None:
 		actions.artist_search(args.artist.lower())
 	if args.album != None:
-		actions.album_search(args.artist.lower(), args.album.lower())
+		actions.album_search(args.artist.lower(), args.album.lower(), args.m)
 if args.command.lower() == "stats":
     actions.user_stats()
 if args.command.lower() == "download":

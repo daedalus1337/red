@@ -53,27 +53,24 @@ def artist_search(artist):
 		print("Release type: " + releases[group["releaseType"]])
 		print("")
 
-def album_search(artist, album):
+def album_search(artist, album, media):
 	artist = {"action": "artist", "artistname": artist}
 	r1 = make_request(artist).json()["response"]
 	for group in r1["torrentgroup"]:
 		if html.unescape(group["groupName"].lower()) == album:
 			album = {"action": "torrentgroup", "id": str(group["groupId"])}
-			r2 = requests.get(url, params=album, headers=header).json()["response"]
+			r2 = make_request(album).json()["response"]
 			for release in r2["torrents"]:
 				if release["format"] == "FLAC":
-					if release["media"] != "Vinyl":
+					if release["media"].lower() in media:
 						if release["encoding"] == "24bit Lossless":
 							print("***THIS IS A 24-BIT RELEASE***")
 						print("Torrent ID: " + str(release["id"]))
-						print("Group ID: " + str(group["groupId"]))
 						print("Media: " + release["media"])
 						print("Size: " + str(sizeof_fmt(release["size"])))
 						print("Files: " + str(release["fileCount"]))
 						print("Seeders: " + str(release["seeders"]))
 						print("")
-		else:
-			continue
 
 def torrent_download(tid, fl):
 	if fl == True:
