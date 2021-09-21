@@ -42,6 +42,16 @@ def sizeof_fmt(num, suffix="B"):
 		num /= 1024.0
 	return "%.1f%s%s" % (num, "Yi", suffix)
 
+def album_info(release):
+	print("Torrent ID: " + str(release["id"]))
+	print("Media: " + release["media"])
+	print("Format: " + release["format"])
+	print("Encoding: " + release["encoding"])
+	print("Size: " + str(sizeof_fmt(release["size"])))
+	print("Files: " + str(release["fileCount"]))
+	print("Seeders: " + str(release["seeders"]))
+	print("")
+
 def artist_search(artist):
 	""" requires 2 arguments """
 	artist = {"action": "artist", "artistname": artist}
@@ -61,17 +71,25 @@ def album_search(artist, album, media, format):
 			album = {"action": "torrentgroup", "id": str(group["groupId"])}
 			r2 = make_request(album).json()["response"]
 			for release in r2["torrents"]:
-				if release["format"].lower() in format and release["media"].lower() in media:
-					if release["encoding"] == "24bit Lossless":
-						print("***THIS IS A 24-BIT RELEASE***")
-					print("Torrent ID: " + str(release["id"]))
-					print("Media: " + release["media"])
-					print("Size: " + str(sizeof_fmt(release["size"])))
-					print("Files: " + str(release["fileCount"]))
-					print("Seeders: " + str(release["seeders"]))
-					print("")
+				if format == None and media == None:
+					album_info(release)
+				elif media == None and format != None:
+					if release["format"].lower() in format:
+						album_info(release)
+				elif format == None and media != None:
+					if release["media"].lower() in media:
+						album_info(release)
+				elif release["format"].lower() in format and release["media"].lower() in media:
+					album_info(release)
 
 def torrent_download(tid, fl):
+	if type(fl) == str:
+		if fl.lower() == "true":
+			fl = True
+		elif fl.lower() == "false":
+			fl = False
+	elif type(fl) == bool:
+		pass
 	if fl == True:
 		download_params = {"action": "download", "id": tid, "usetoken": True}
 	else:
