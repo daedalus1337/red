@@ -3,30 +3,11 @@ import html
 import os
 import sys
 from dotenv import load_dotenv, find_dotenv
+import const as c
 
 load_dotenv(find_dotenv())
 url = "https://redacted.ch/ajax.php?"
 header = {"Authorization": os.getenv("KEY")}
-
-#incomplete.  API only provides integer, so I"m stuck having to manually add these as I identify them.
-releases = {
-	1: "Album",
-	3: "Soundtrack",
-	5: "EP",
-	6: "Anthology",
-	7: "Compilation",
-	9: "Single",
-	11: "Live Album",
-	13: "Remix",
-	14: "Bootleg",
-	17: "Demo",
-	18: "Concert Recording",
-	19: "DJ Mix",
-	1021: "Produced Bys",
-	1022: "Composition",
-	1023: "Remixed Bys",
-	1024: "Guest Appearance"
-}
 
 def make_request(params):
 	req = requests.get(url, params=params, headers=header)
@@ -50,7 +31,7 @@ def artist_search(artist):
 	print("")
 	for group in r1["torrentgroup"]:
 		print("Album name: " + html.unescape(group["groupName"]))
-		print("Release type: " + releases[group["releaseType"]])
+		print("Release type: " + c.releases[group["releaseType"]])
 		print("")
 
 def album_search(artist, album, media, format):
@@ -78,7 +59,9 @@ def torrent_download(tid, fl):
 	artist = str((r1.json()["response"]["group"]["musicInfo"]["artists"][0]["name"]))
 	download_params = {"action": "download", "id": tid, "usetoken": fl}
 	r2 = make_request(download_params)
-	open(os.getenv("FILE_DIR") + artist + " - " + album + ".torrent", "wb").write(r2.content)
+	path = os.getenv("FILE_DIR") + artist + " - " + album + ".torrent"
+	open(path, "wb").write(r2.content)
+	print(f"Torrent for {artist} - {album} was successfully downloaded!")
 
 def user_stats():
     stats = {"action": "index"}
