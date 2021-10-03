@@ -42,7 +42,7 @@ def sizeof_fmt(num, suffix="B"):
 		num /= 1024.0
 	return "%.1f%s%s" % (num, "Yi", suffix)
 
-def album_info(release):
+def print_album_info(release):
 	print("Torrent ID: " + str(release["id"]))
 	print("Media: " + release["media"])
 	print("Format: " + release["format"])
@@ -59,7 +59,7 @@ def artist_search(artist):
 
 	print("")
 	for group in r1["torrentgroup"]:
-		print("Album name: " + html.unescape(group["groupName"]))
+		print("Release name: " + html.unescape(group["groupName"]))
 		print("Release type: " + releases[group["releaseType"]])
 		print("")
 
@@ -68,19 +68,19 @@ def album_search(artist, album, media, format):
 	r1 = make_request(artist).json()["response"]
 	for group in r1["torrentgroup"]:
 		if html.unescape(group["groupName"].lower()) == album:
-			album = {"action": "torrentgroup", "id": str(group["groupId"])}
-			r2 = make_request(album).json()["response"]
+			group = {"action": "torrentgroup", "id": str(group["groupId"])}
+			r2 = make_request(group).json()["response"]
 			for release in r2["torrents"]:
 				if format == None and media == None:
-					album_info(release)
+					print_album_info(release)
 				elif media == None and format != None:
 					if release["format"].lower() in format:
-						album_info(release)
+						print_album_info(release)
 				elif format == None and media != None:
 					if release["media"].lower() in media:
-						album_info(release)
+						print_album_info(release)
 				elif release["format"].lower() in format and release["media"].lower() in media:
-					album_info(release)
+					print_album_info(release)
 
 def torrent_download(tid, fl):
 	if type(fl) == str:
