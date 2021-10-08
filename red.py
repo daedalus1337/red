@@ -1,5 +1,6 @@
 import actions
 import argparse
+import sys
 
 parser = argparse.ArgumentParser()
 subparsers = parser.add_subparsers(help="Functions")
@@ -20,6 +21,12 @@ parser_3.add_argument("-fl", action="store_true")
 parser_3.set_defaults(command="download")
 
 args = parser.parse_args()
+
+try:
+    args.command
+except:
+    parser.print_help()
+    sys.exit(0)
 
 if args.command.lower() == "search":
 	if args.album == None:

@@ -6,11 +6,10 @@ from dotenv import load_dotenv, find_dotenv
 import const as c
 
 load_dotenv(find_dotenv())
-url = "https://redacted.ch/ajax.php?"
 header = {"Authorization": os.getenv("KEY")}
 
 def make_request(params):
-	req = requests.get(url, params=params, headers=header)
+	req = requests.get(c.url, params=params, headers=header)
 	if req.status_code != 200:
 		print(f"Status of request is {req.status_code}. Aborting...")
 		sys.exit()
@@ -65,7 +64,7 @@ def torrent_download(tid, fl):
 
 def user_stats():
     stats = {"action": "index"}
-    r1 = requests.get(url, params=stats, headers=header).json()["response"]
+    r1 = requests.get(c.url, params=stats, headers=header).json()["response"]
     print("Username........." + r1["username"])
     print("Class............" + r1["userstats"]["class"])
     print("Ratio............" + str(r1["userstats"]["ratio"]))

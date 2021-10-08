@@ -16,3 +16,5 @@ releases = {
 	1023: "Remixed Bys",
 	1024: "Guest Appearance"
 }
+
+url = "https://redacted.ch/ajax.php?"
