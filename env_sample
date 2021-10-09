@@ -1,0 +1,6 @@
+# redacted
+KEY="XXXXXXXXXXXXX"
+FILE_DIR="/FILE/DOWNLOAD/PATH"
+DEFAULT_FORMAT=['flac']
+DEFAULT_MEDIA=['web','cd']
+USE_FL=False
