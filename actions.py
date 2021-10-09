@@ -30,7 +30,6 @@ def print_album_info(release):
 	print("Size: " + str(sizeof_fmt(release["size"])))
 	print("Files: " + str(release["fileCount"]))
 	print("Seeders: " + str(release["seeders"]))
-	print("")
 
 def artist_search(artist):
 	""" requires 2 arguments """
