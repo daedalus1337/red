@@ -1,0 +1,10 @@
+{ 
+    "key": "YOUR_API_KEY",
+    "file_dir": "/absolute/path/to/download/location",
+    "defaults": {
+        "format": ["flac", "mp3"],
+        "media": ["web", "cd", "vinyl"],
+        "release": ["album", "single", "EP"]
+    },
+    "freeleech": false
+}
