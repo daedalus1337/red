@@ -8,6 +8,7 @@ releases = {
 	11: "Live Album",
 	13: "Remix",
 	14: "Bootleg",
+	16: "Mixtapes",
 	17: "Demo",
 	18: "Concert Recording",
 	19: "DJ Mix",
