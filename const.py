@@ -7,6 +7,7 @@ releases = {
 	9: "Single",
 	11: "Live Album",
 	13: "Remix",
+	15: "Interview",
 	14: "Bootleg",
 	16: "Mixtape",
 	17: "Demo",
