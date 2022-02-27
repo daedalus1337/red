@@ -71,14 +71,14 @@ def album_search(args, header):
 
 def torrent_download(args, dir, header):
 	if args.fl is True:
-		download_params = {"action": "download", "id": args.torrentid, "usetoken": True}
+		download_params = {"action": "download", "id": args.torrentid, "usetoken": int(True)}
 	else:
 		download_params = {"action": "download", "id": args.torrentid}
 	details_params = {"action": "torrent", "id": args.torrentid}
 	r1 = make_request(details_params, header)
 	album = r1.json()["response"]["group"]["name"]
 	artist = str((r1.json()["response"]["group"]["musicInfo"]["artists"][0]["name"]))
-	download_params = {"action": "download", "id": args.torrentid, "usetoken": args.fl}
+	download_params = {"action": "download", "id": args.torrentid, "usetoken": int(args.fl)}
 	r2 = make_request(download_params, header)
 	path = dir + artist + " - " + album + ".torrent"
 	open(path, "wb").write(r2.content)
