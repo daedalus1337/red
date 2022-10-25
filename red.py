@@ -3,6 +3,7 @@ import argparse
 import sys
 import os
 import json
+import const as c
 
 filename = os.path.join(os.path.dirname(__file__), 'config.json')
 with open(filename) as jsonfile:
@@ -14,6 +15,7 @@ default_release = data['defaults']['release']
 default_media = data['defaults']['media']
 default_format = data['defaults']['format']
 freeleech = data['freeleech']
+toplist_limit = data['toplist_limit']
 header = {"Authorization": api_key}
 
 parser = argparse.ArgumentParser()
@@ -35,6 +37,10 @@ parser_3.add_argument("torrentid", type=int, help="torrent ID found in album sea
 parser_3.add_argument("-fl", action="store_true", default=freeleech)
 parser_3.set_defaults(command="download")
 
+parser_4 = subparsers.add_parser("top", help="shows the top torrents")
+parser_4.add_argument("top", action="store_true", help="shows the top torrents")
+parser_4.set_defaults(command="top")
+
 args = parser.parse_args()
 
 try:
@@ -52,3 +58,11 @@ if args.command.lower() == "stats":
     actions.user_stats(header)
 if args.command.lower() == "download":
 	actions.torrent_download(args,file_dir, header)
+if args.command.lower() == "top":
+	print("choose a list")
+	n = 1
+	for i in c.top_lists:
+		print(str(n) + ") " + c.top_lists[i])
+		n += 1
+	list = int(input("Enter a number:"))
+	actions.top(header, list, toplist_limit)

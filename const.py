@@ -20,4 +20,13 @@ releases = {
 	1024: "Guest Appearance"
 }
 
+top_lists = {
+	1: "Most Active Torrents Uploaded in the Past Day",
+	2: "Most Active Torrents Uploaded in the Past Week",
+	3: "Most Active Torrents of All Time",
+	4: "Most Snatched Torrents",
+	5: "Most Data Transferred Torrents",
+	6: "Best Seeded Torrents"
+}
+
 url = "https://redacted.ch/ajax.php?"

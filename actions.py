@@ -95,3 +95,27 @@ def user_stats(header):
 	print("Upload..........." + str(sizeof_fmt(r1["userstats"]["uploaded"])))
 	print("Download........." + str(sizeof_fmt(r1["userstats"]["downloaded"])))
 	print("Messages........." + str(r1["notifications"]["messages"]))
+
+def top(header, list, toplist_limit):
+	action = {"action": "top10", "limit": toplist_limit}
+	r1 = requests.get(c.url, params=action, headers=header).json()["response"]
+	for item in r1:
+		if item["caption"] == c.top_lists[list]:
+			print("---")
+			print(item["caption"])
+			print("---")
+			n = 1
+			for r in item["results"]:
+				if r["artist"] == False:
+					print(str(n) + ") " + r["groupName"])
+				else:
+					print(str(n) + ") " + str(r["artist"]) + " - " + str(r["groupName"]))
+				print("Torrent ID: " + str(r["torrentId"]))
+				print("Media: " + r["media"])
+				print("Format: " + r["format"])
+				print("Encoding: " + r["encoding"])
+				print("Size: " + str(sizeof_fmt(r["size"])))
+				# print("Files: " + str(r["fileCount"]))
+				print("Seeders: " + str(r["seeders"]))
+				print("")
+				n += 1

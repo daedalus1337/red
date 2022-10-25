@@ -35,6 +35,9 @@ Here's how it works:
 		- Upload
 		- Download
 		- Messages
+4. top lists
+	- run `red.py top` to view the top torrents lists
+		- you then can select which list you'd like to see
+	- the limit is in the config.json.  you can set the limit to 10, 100, and 250
 
-
-Also, a huge thank you to my new friend Protsaq for his amazing contributions.
+Also, a huge thank you to my new friend Paotsaq for his amazing contributions.
