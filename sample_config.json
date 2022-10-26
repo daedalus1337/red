@@ -6,5 +6,6 @@
         "media": ["web", "cd", "vinyl"],
         "release": ["album", "single", "EP"]
     },
-    "freeleech": false
+    "freeleech": false,
+    "toplist_limit": 10
 }
