@@ -2,6 +2,9 @@ import requests
 import html
 import sys
 import const as c
+from prettytable import PrettyTable, ALL
+import os
+from termcolor import colored, cprint
 
 
 def make_request(params, header):
@@ -119,3 +122,35 @@ def top(header, list, toplist_limit):
 				print("Seeders: " + str(r["seeders"]))
 				print("")
 				n += 1
+
+def inbox(header):
+	action = {"action": "inbox"}
+	r1 = requests.get(c.url, params=action, headers=header).json()["response"]
+	t = PrettyTable()
+	# t.field_names = ["Sender", "Unread", "Subject", "Message ID"]
+	t.field_names = ["Sender", "Subject", "Message ID"]
+	t.hrules = ALL
+	t._min_width = {"Message ID": 12}
+	t.max_table_width = os.get_terminal_size()[0]-4
+	for item in r1["messages"]:
+		if item["senderId"] == 0:
+			sender = "SYSTEM"
+		else:
+			sender = html.unescape(item["username"])
+		subject = html.unescape(item["subject"])
+		if item["unread"] == True:
+			subject = colored("*", "green") + " " + subject
+		t.add_row([sender, subject, item["convId"]])
+	print(t)
+
+def read(header, args):
+	action = {"action": "inbox", "type": "viewconv", "id": args.messageId}
+	r1 = requests.get(c.url, params=action, headers=header).json()["response"]
+	# print(r1)
+	print("")
+	print(r1["subject"])
+	print("---")
+	for item in r1["messages"]:
+		print(item["senderName"] + ":")
+		print(html.unescape(item["bbBody"]))
+		print("")

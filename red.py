@@ -41,6 +41,14 @@ parser_4 = subparsers.add_parser("top", help="shows the top torrents")
 parser_4.add_argument("top", action="store_true", help="shows the top torrents")
 parser_4.set_defaults(command="top")
 
+parser_5 = subparsers.add_parser("inbox", help="shows your messages")
+parser_5.add_argument("inbox", action="store_true", help="shows your messages")
+parser_5.set_defaults(command="inbox")
+
+parser_6 = subparsers.add_parser("read", help="read a message")
+parser_6.add_argument("messageId", type=int, help="read a message")
+parser_6.set_defaults(command="read")
+
 args = parser.parse_args()
 
 try:
@@ -66,3 +74,7 @@ if args.command.lower() == "top":
 		n += 1
 	list = int(input("Enter a number:"))
 	actions.top(header, list, toplist_limit)
+if args.command.lower() == "inbox":
+	actions.inbox(header)
+if args.command.lower() == "read":
+	actions.read(header, args)

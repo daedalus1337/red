@@ -39,5 +39,16 @@ Here's how it works:
 	- run `red.py top` to view the top torrents lists
 		- you then can select which list you'd like to see
 	- the limit is in the config.json.  you can set the limit to 10, 100, and 250
+5. inbox
+	- run `red.py inbox` to view your inbox
+	- it will show the sender, the subject, and the message ID in a pretty badass table
+	- if a message is unread, a green `*` will appear to the left of the subject text
+6. read
+	- if you want to read a message from yorur inbox, copy the message ID and run this command: `red.py read messageID`
+	- it will show the entire correspondence of that conversation; no there is no way to sort it, or show only one, or anything beyond what you see when you run the intial command.  I'm open to suggestion though.
+
+## roadmap
+- messaging: I'll probably be adding the ability to send messages, but I'm lazy right now.
+- color-coding: I added the green `*` in there, and now that I have that functionality added, I might as well make other things colorful as well. 
 
 Also, a huge thank you to my new friend Paotsaq for his amazing contributions.
