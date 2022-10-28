@@ -11,6 +11,7 @@ def make_request(params, header):
 	req = requests.get(c.url, params=params, headers=header)
 	if req.status_code != 200:
 		print(f"Status of request is {req.status_code}. Aborting...")
+		print(req._content)
 		sys.exit()
 	return req
 
@@ -89,8 +90,8 @@ def torrent_download(args, dir, header):
 
 
 def user_stats(header):
-	stats = {"action": "index"}
-	r1 = requests.get(c.url, params=stats, headers=header).json()["response"]
+	stats_params = {"action": "index"}
+	r1 = make_request(stats_params, header).json()["response"]
 	print("Username........." + r1["username"])
 	print("Class............" + r1["userstats"]["class"])
 	print("Ratio............" + str(r1["userstats"]["ratio"]))
@@ -100,8 +101,8 @@ def user_stats(header):
 	print("Messages........." + str(r1["notifications"]["messages"]))
 
 def top(header, list, toplist_limit):
-	action = {"action": "top10", "limit": toplist_limit}
-	r1 = requests.get(c.url, params=action, headers=header).json()["response"]
+	list_params = {"action": "top10", "limit": toplist_limit}
+	r1 = make_request(list_params, header).json()["response"]
 	for item in r1:
 		if item["caption"] == c.top_lists[list]:
 			print("---")
@@ -118,19 +119,17 @@ def top(header, list, toplist_limit):
 				print("Format: " + r["format"])
 				print("Encoding: " + r["encoding"])
 				print("Size: " + str(sizeof_fmt(r["size"])))
-				# print("Files: " + str(r["fileCount"]))
 				print("Seeders: " + str(r["seeders"]))
 				print("")
 				n += 1
 
 def inbox(header):
-	action = {"action": "inbox"}
-	r1 = requests.get(c.url, params=action, headers=header).json()["response"]
+	inbox_params = {"action": "inbox"}
+	r1 = make_request(inbox_params, header)
+	r1 = make_request(inbox_params, header).json()["response"]
 	t = PrettyTable()
-	# t.field_names = ["Sender", "Unread", "Subject", "Message ID"]
 	t.field_names = ["Sender", "Subject", "Message ID"]
 	t.hrules = ALL
-	t._min_width = {"Message ID": 12}
 	t.max_table_width = os.get_terminal_size()[0]-4
 	for item in r1["messages"]:
 		if item["senderId"] == 0:
@@ -144,9 +143,8 @@ def inbox(header):
 	print(t)
 
 def read(header, args):
-	action = {"action": "inbox", "type": "viewconv", "id": args.messageId}
-	r1 = requests.get(c.url, params=action, headers=header).json()["response"]
-	# print(r1)
+	read_params = {"action": "inbox", "type": "viewconv", "id": args.messageId}
+	r1 = make_request(read_params, header).json()["response"]
 	print("")
 	print(r1["subject"])
 	print("---")
