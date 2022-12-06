@@ -1,6 +1,6 @@
 from InquirerPy import inquirer
 from InquirerPy.base.control import Choice
-from InquirerPy.separator import Separator
+from InquirerPy.validator import PathValidator
 import json
 import actions
 import const as c
@@ -11,25 +11,32 @@ try:
 except Exception:
     configured = False
 
-if configured == True:
-    format = actions.default_format
-    media = actions.default_media
-    release = actions.default_release
+# if configured == True:
+#     format = actions.default_format
+#     media = actions.default_media
+#     release = actions.default_release
+#     limit = actions.toplist_limit
+#     freeleech = actions.freeleech
+#     file_dir = actions.file_dir
+# else:
+#     format = []
+#     media = []
+#     release = []
+#     limit = 10
+#     freeleech = False
+#     file_dir = ""
 
-# question1_choice = [
-#     Separator(),
-#     Choice("ap-southeast-2", name="Sydney", enabled=True),
-#     Choice("ap-southeast-1", name="Singapore", enabled=False),
-#     Separator(),
-#     "us-east-1",
-#     "us-west-1",
-#     Separator(),
-# ]
+format = actions.default_format if configured == True else []
+media = actions.default_media if configured == True else []
+release = actions.default_release if configured == True else []
+limit = actions.toplist_limit if configured == True else 10
+freeleech = actions.freeleech if configured == True else False
+file_dir = actions.file_dir if configured == True else ""
 
 question1_choice = []
 
 for i in c.releases:
-    if c.releases[i] in actions.default_release:
+    if c.releases[i] in release:
         question1_choice.append(Choice(c.releases[i], enabled=True))
     else:
         question1_choice.append(Choice(c.releases[i], enabled=False))
@@ -37,7 +44,7 @@ for i in c.releases:
 question2_choice = []
 
 for i in c.formats:
-    if c.formats[i] in actions.default_format:
+    if c.formats[i] in format:
         question2_choice.append(Choice(c.formats[i], enabled=True))
     else:
         question2_choice.append(Choice(c.formats[i], enabled=False))
@@ -45,27 +52,15 @@ for i in c.formats:
 question3_choice = []
 
 for i in c.media:
-    if c.media[i] in actions.default_media:
+    if c.media[i] in media:
         question3_choice.append(Choice(c.media[i], enabled=True))
     else:
         question3_choice.append(Choice(c.media[i], enabled=False))
-
-question4_choice = []
-
-for i in c.top_list_count:
-    if i == actions.toplist_limit:
-        question4_choice.append(Choice(i, enabled=True))
-    else:
-        question4_choice.append(Choice(i, enabled=False))
-
 
 def main():
     release_selection = inquirer.checkbox(
         message="Select the releases you wish to see by default:",
         choices=question1_choice,
-        # cycle=False,
-        # transformer=lambda result: "%s release%s selected"
-        # % (len(result), "s" if len(result) > 1 else ""),
         validate=lambda result: len(result) >= 1,
         invalid_message="should be at least 1 selection",
         instruction="(select at least 1)",
@@ -84,14 +79,32 @@ def main():
         invalid_message="should be at least 1 selection",
         instruction="(select at least 1)",
     ).execute()
-    media_selection = inquirer.checkbox(
-        message="How many results do you want to see when searchign the Top X lists?:",
-        choices=question3_choice,
-        validate=lambda result: len(result) >= 1,
-        invalid_message="should be at least 1 selection",
-        instruction="(select at least 1)",
+    toplimit_selection = inquirer.select(
+        message="How many results do you want to see when searching the Top X lists?:",
+        choices=[10,100,250],
+        multiselect=False,
+        default=limit
     ).execute()
+    freeleech_selection = inquirer.confirm(
+        message="Do you want to automatically use available freeleech tokens when downloading torrent files?",
+        default=freeleech
+    ).execute()
+    dest_path = inquirer.filepath(
+        message="Enter the path where you want files to be downloaded to:",
+        validate=PathValidator(is_dir=True, message="Input is not a directory"),
+        only_directories=True,
+        default = file_dir
+    ).execute()
+    
+    c.config_json["defaults"]["release"] = release_selection
+    c.config_json["defaults"]["media"] = media_selection
+    c.config_json["defaults"]["format"] = format_selection
+    c.config_json["toplist_limit"] = toplimit_selection
+    c.config_json["freeleech"] = freeleech_selection
+    c.config_json["file_dir"] = dest_path
 
+    with open("config.json", "w") as f:
+        json.dump(c.config_json, f, indent=4)
 
 if __name__ == "__main__":
     main()

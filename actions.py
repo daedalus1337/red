@@ -23,6 +23,10 @@ def load_config():
 		default_format = data["defaults"]["format"]
 		global toplist_limit
 		toplist_limit = data["toplist_limit"]
+		global freeleech
+		freeleech = data["freeleech"]
+		global file_dir
+		file_dir = data["file_dir"]
 
 def make_request(params):
 	header = {"Authorization": dotenv_values(".env")["KEY"]}
