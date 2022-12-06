@@ -9,7 +9,7 @@ Here's how it works:
 - Try running any command.  The application will detect that you have not registered an API key, and it will prompt you to enter it in.  It will create a `.env` file for you, so you don't even have to worry about it.
 - Most other functions will work without any further configuration.  However, I do recommend reading the next section to learn more about configuration.
 
-## usage
+## commands
 
 1. Configure
 	- The goal for the configurator is to set up specific default settings to personalize your search experience.  It allows you to configure the folowing search filters as defaults so you do not need to manually specify them every time you search:
