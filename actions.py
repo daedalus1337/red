@@ -4,14 +4,19 @@ import sys
 import const as c
 from prettytable import PrettyTable, ALL
 import os
-from termcolor import colored, cprint
+from termcolor import colored
+from rich.table import Table
+from dotenv import dotenv_values
+from rich.console import Console
 
+console = Console(highlight=False)
 
-def make_request(params, header):
+def make_request(params):
+	header = {"Authorization": dotenv_values(".env")["KEY"]}
 	req = requests.get(c.url, params=params, headers=header)
 	if req.status_code != 200:
-		print(f"Status of request is {req.status_code}. Aborting...")
-		print(req._content)
+		console.print(f"Status of request is {req.status_code}. Aborting...")
+		console.print(req._content)
 		sys.exit()
 	return req
 
@@ -25,112 +30,67 @@ def sizeof_fmt(num, suffix="B"):
 
 
 def print_album_info(release):
-	print("Torrent ID: " + str(release["id"]))
-	print("Media: " + release["media"])
-	print("Format: " + release["format"])
-	print("Encoding: " + release["encoding"])
-	print("Size: " + str(sizeof_fmt(release["size"])))
-	print("Files: " + str(release["fileCount"]))
-	print("Seeders: " + str(release["seeders"]))
-	print("")
+	console.print("Torrent ID: " + str(release["torrentId"]) if "torrentId" in release else "Torrent ID: " + str(release["id"]))
+	console.print("Media: " + release["media"])
+	console.print("Format: " + release["format"])
+	console.print("Encoding: " + release["encoding"])
+	console.print("Size: " + str(sizeof_fmt(release["size"])))
+	if "fileCount" in release:
+		console.print("Files: " + str(release["fileCount"]))
+	console.print("Seeders: " + str(release["seeders"]))
+	console.print("")
 
-
-def artist_search(args, header):
-	""" requires 2 arguments """
-	artist = {"action": "artist", "artistname": args.artist.lower()}
-	r1 = make_request(artist, header).json()["response"]
-	if args.r is None:
+def search(artist, releases, media, format, album=None):
+	if album:
+		artist_action = {"action": "artist", "artistname": artist.lower()}
+		r1 = make_request(artist_action).json()["response"]
 		for group in r1["torrentgroup"]:
-			print("Release name: " + html.unescape(group["groupName"]))
-			print("Release type: " + c.releases[group["releaseType"]])
-			print("")
-	elif args.r is not None:
-		for release in args.r:
-			for group in r1["torrentgroup"]:
-				if c.releases[group["releaseType"]].lower() == release:
-					print("Release name: " + html.unescape(group["groupName"]))
-					print("Release type: " + c.releases[group["releaseType"]])
-					print("")
-
-
-def album_search(args, header):
-	artist = {"action": "artist", "artistname": args.artist.lower()}
-	r1 = make_request(artist, header).json()["response"]
-	for group in r1["torrentgroup"]:
-		if html.unescape(group["groupName"].lower()) == args.album.lower():
-			group = {"action": "torrentgroup", "id": str(group["groupId"])}
-			r2 = make_request(group, header).json()["response"]
-			for release in r2["torrents"]:
-				if args.f is None and args.m is None:
-					print_album_info(release)
-				elif args.m is None and args.f is not None:
-					if release["format"].lower() in args.f:
+			if html.unescape(group["groupName"].lower()) == album.lower():
+				group_action = {"action": "torrentgroup", "id": str(group["groupId"])}
+				r2 = make_request(group_action).json()["response"]
+				for release in r2["torrents"]:
+					if format is None and media is None:
 						print_album_info(release)
-				elif args.f is None and args.m is not None:
-					if release["media"].lower() in args.m:
+					elif media is None and format is not None:
+						if release["format"].lower() in format:
+							print_album_info(release)
+					elif format is None and media is not None:
+						if release["media"].lower() in media:
+							print_album_info(release)
+					elif release["format"].lower() in format and release["media"].lower() in media:
 						print_album_info(release)
-				elif release["format"].lower() in args.f and release["media"].lower() in args.m:
-					print_album_info(release)
-
-
-def torrent_download(args, dir, header):
-	if args.fl is True:
-		download_params = {"action": "download", "id": args.torrentid, "usetoken": int(True)}
 	else:
-		download_params = {"action": "download", "id": args.torrentid}
-	details_params = {"action": "torrent", "id": args.torrentid}
-	r1 = make_request(details_params, header)
-	album = r1.json()["response"]["group"]["name"]
-	artist = str((r1.json()["response"]["group"]["musicInfo"]["artists"][0]["name"]))
-	download_params = {"action": "download", "id": args.torrentid, "usetoken": int(args.fl)}
-	r2 = make_request(download_params, header)
-	path = dir + artist + " - " + album + ".torrent"
-	open(path, "wb").write(r2.content)
-	print(f"Torrent for {artist} - {album} was successfully downloaded!")
+		action = {"action": "artist", "artistname": artist.lower()}
+		r1 = make_request(action).json()["response"]
+		if releases is None:
+			for group in r1["torrentgroup"]:
+				console.print("Release name: " + html.unescape(group["groupName"]))
+				console.print("Release type: " + c.releases[group["releaseType"]])
+				console.print("")
+		elif releases is not None:
+			for release in releases:
+				for group in r1["torrentgroup"]:
+					if c.releases[group["releaseType"]].lower() == release:
+						console.print("Release name: " + html.unescape(group["groupName"]))
+						console.print("Release type: " + c.releases[group["releaseType"]])
+						console.print("")
 
+def stats():
+	stats_action = {"action": "index"}
+	r1 = make_request(stats_action).json()["response"]
+	t = Table(title=colored(r1["username"], "green"), show_header = False)
+	t.add_row("Class", r1["userstats"]["class"])
+	t.add_row("Ratio", str(r1["userstats"]["ratio"]))
+	t.add_row("Required Ratio", str(r1["userstats"]["requiredratio"]))
+	t.add_row("Upload", str(sizeof_fmt(r1["userstats"]["uploaded"])))
+	t.add_row("Download", str(sizeof_fmt(r1["userstats"]["downloaded"])))
+	t.add_row("Messages", str(colored(r1["notifications"]["messages"], "green") if r1["notifications"]["messages"] != 0 else r1["notifications"]["messages"]))
+	console.print(t)
 
-def user_stats(header):
-	stats_params = {"action": "index"}
-	r1 = make_request(stats_params, header).json()["response"]
-	print("Username........." + r1["username"])
-	print("Class............" + r1["userstats"]["class"])
-	print("Ratio............" + str(r1["userstats"]["ratio"]))
-	print("Required Ratio..." + str(r1["userstats"]["requiredratio"]))
-	print("Upload..........." + str(sizeof_fmt(r1["userstats"]["uploaded"])))
-	print("Download........." + str(sizeof_fmt(r1["userstats"]["downloaded"])))
-	print("Messages........." + str(r1["notifications"]["messages"]))
-
-def top(header, list, toplist_limit):
-	list_params = {"action": "top10", "limit": toplist_limit}
-	r1 = make_request(list_params, header).json()["response"]
-	for item in r1:
-		if item["caption"] == c.top_lists[list]:
-			print("---")
-			print(item["caption"])
-			print("---")
-			n = 1
-			for r in item["results"]:
-				if r["artist"] == False:
-					print(str(n) + ") " + r["groupName"])
-				else:
-					print(str(n) + ") " + str(r["artist"]) + " - " + str(r["groupName"]))
-				print("Torrent ID: " + str(r["torrentId"]))
-				print("Media: " + r["media"])
-				print("Format: " + r["format"])
-				print("Encoding: " + r["encoding"])
-				print("Size: " + str(sizeof_fmt(r["size"])))
-				print("Seeders: " + str(r["seeders"]))
-				print("")
-				n += 1
-
-def inbox(header):
-	inbox_params = {"action": "inbox"}
-	r1 = make_request(inbox_params, header)
-	r1 = make_request(inbox_params, header).json()["response"]
-	t = PrettyTable()
-	t.field_names = ["Sender", "Subject", "Message ID"]
-	t.hrules = ALL
-	t.max_table_width = os.get_terminal_size()[0]-4
+def inbox():
+	inbox_action = {"action": "inbox"}
+	r1 = make_request(inbox_action).json()["response"]
+	t = Table("Sender", "Subject", "Message ID", title=colored("Inbox", "green"))
 	for item in r1["messages"]:
 		if item["senderId"] == 0:
 			sender = "SYSTEM"
@@ -139,16 +99,44 @@ def inbox(header):
 		subject = html.unescape(item["subject"])
 		if item["unread"] == True:
 			subject = colored("*", "green") + " " + subject
-		t.add_row([sender, subject, item["convId"]])
-	print(t)
+		t.add_row(sender, subject, str(item["convId"]))
+	console.print(t)
 
-def read(header, args):
-	read_params = {"action": "inbox", "type": "viewconv", "id": args.messageId}
-	r1 = make_request(read_params, header).json()["response"]
-	print("")
-	print(r1["subject"])
-	print("---")
+def torrent_download(dir, torrentid, fl):
+	torrent_action = {"action": "torrent", "id": torrentid}
+	r1 = make_request(torrent_action)
+	album = r1.json()["response"]["group"]["name"]
+	artist = str((r1.json()["response"]["group"]["musicInfo"]["artists"][0]["name"]))
+	download_action = {"action": "download", "id": torrentid, "usetoken": int(fl)} if fl == True else {"action": "download", "id": torrentid}
+	r2 = make_request(download_action)
+	path = dir + artist + " - " + album + ".torrent"
+	open(path, "wb").write(r2.content)
+	console.print(f"Torrent for {artist} - {album} was successfully downloaded!")
+
+def top(list, toplist_limit):
+	list_action = {"action": "top10", "limit": toplist_limit}
+	r1 = make_request(list_action).json()["response"]
+	for item in r1:
+		if item["caption"] == c.top_lists[list]:
+			console.print("---")
+			console.print(item["caption"])
+			console.print("---")
+			n = 1
+			for r in item["results"]:
+				if r["artist"] == False:
+					console.print(str(n) + ") " + r["groupName"])
+				else:
+					console.print(str(n) + ") " + str(r["artist"]) + " - " + str(r["groupName"]))
+				print_album_info(r)
+				n += 1
+
+def read(message_id):
+	read_action = {"action": "inbox", "type": "viewconv", "id": message_id}
+	r1 = make_request(read_action).json()["response"]
+	console.print("")
+	console.print(r1["subject"])
+	console.print("---")
+	t = Table("Sender", "Message", show_lines = True)
 	for item in r1["messages"]:
-		print(item["senderName"] + ":")
-		print(html.unescape(item["bbBody"]))
-		print("")
+		t.add_row(item["senderName"], html.unescape(item["bbBody"]))
+	console.print(t)

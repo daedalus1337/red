@@ -1,3 +1,6 @@
+from dotenv import dotenv_values
+header = {"Authorization": dotenv_values(".env")["KEY"]}
+
 releases = {
 	1: "Album",
 	3: "Soundtrack",
