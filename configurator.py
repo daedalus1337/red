@@ -2,62 +2,35 @@ from InquirerPy import inquirer
 from InquirerPy.base.control import Choice
 from InquirerPy.validator import PathValidator
 import json
-import actions
 import const as c
 
-try:
-    config = actions.load_config()
-    configured = True
-except Exception:
-    configured = False
+def main(release, format, media, limit, freeleech, file_dir):
 
-# if configured == True:
-#     format = actions.default_format
-#     media = actions.default_media
-#     release = actions.default_release
-#     limit = actions.toplist_limit
-#     freeleech = actions.freeleech
-#     file_dir = actions.file_dir
-# else:
-#     format = []
-#     media = []
-#     release = []
-#     limit = 10
-#     freeleech = False
-#     file_dir = ""
+    question1_choice = []
 
-format = actions.default_format if configured == True else []
-media = actions.default_media if configured == True else []
-release = actions.default_release if configured == True else []
-limit = actions.toplist_limit if configured == True else 10
-freeleech = actions.freeleech if configured == True else False
-file_dir = actions.file_dir if configured == True else ""
+    for i in c.releases:
+        if c.releases[i] in release:
+            question1_choice.append(Choice(c.releases[i], enabled=True))
+        else:
+            question1_choice.append(Choice(c.releases[i], enabled=False))
 
-question1_choice = []
+    question2_choice = []
 
-for i in c.releases:
-    if c.releases[i] in release:
-        question1_choice.append(Choice(c.releases[i], enabled=True))
-    else:
-        question1_choice.append(Choice(c.releases[i], enabled=False))
+    for i in c.formats:
+        if c.formats[i] in format:
+            question2_choice.append(Choice(c.formats[i], enabled=True))
+        else:
+            question2_choice.append(Choice(c.formats[i], enabled=False))
 
-question2_choice = []
+    question3_choice = []
 
-for i in c.formats:
-    if c.formats[i] in format:
-        question2_choice.append(Choice(c.formats[i], enabled=True))
-    else:
-        question2_choice.append(Choice(c.formats[i], enabled=False))
+    for i in c.media:
+        if c.media[i] in media:
+            question3_choice.append(Choice(c.media[i], enabled=True))
+        else:
+            question3_choice.append(Choice(c.media[i], enabled=False))
 
-question3_choice = []
 
-for i in c.media:
-    if c.media[i] in media:
-        question3_choice.append(Choice(c.media[i], enabled=True))
-    else:
-        question3_choice.append(Choice(c.media[i], enabled=False))
-
-def main():
     release_selection = inquirer.checkbox(
         message="Select the releases you wish to see by default:",
         choices=question1_choice,
@@ -101,7 +74,10 @@ def main():
     c.config_json["defaults"]["format"] = format_selection
     c.config_json["toplist_limit"] = toplimit_selection
     c.config_json["freeleech"] = freeleech_selection
-    c.config_json["file_dir"] = dest_path
+    if dest_path[-1] == "/":
+        c.config_json["file_dir"] = dest_path
+    elif dest_path[-1] != "/":
+        c.config_json["file_dir"] = dest_path + "/"
 
     with open("config.json", "w") as f:
         json.dump(c.config_json, f, indent=4)

@@ -3,9 +3,11 @@ import const as c
 import typer
 from typing import List, Optional
 from rich.console import Console
+from rich.text import Text
+from dotenv import dotenv_values
 import sys
-from termcolor import colored
 import os
+import configurator
 
 console = Console(highlight=False)
 
@@ -21,22 +23,33 @@ except Exception:
     configured = False
 
 if os.path.isfile(".env"):
-    pass
+    if len(dotenv_values(".env")["KEY"]) > 1 and type(dotenv_values(".env")["KEY"]) == str:
+        pass
+    else:
+        console.print(Text("Please register your API key", style="red"))
+        actions.register_key()
 else:
-    console.print(colored("Tihs is likely your first run, as you have not registered your API key.", "red"))
-    api_key = input("Please enter your API key (or press Ctrl + C to exit): ")
-    f = open(".env", "w")
-    f.write(f"KEY='{api_key}'")
-    f.close()
-    
+    console.print(Text("Tihs is likely your first run, as you have not registered your API key.", style="red"))
+    actions.register_key()
+
+@app.command()
+def configure(
+    format: Optional[List[str]] = actions.default_format if configured == True else [],
+    media: Optional[List[str]] = actions.default_media if configured == True else [],
+    release: Optional[List[str]] = actions.default_release if configured == True else [],
+    limit: int = actions.toplist_limit if configured == True else 10,
+    freeleech: bool = actions.freeleech if configured == True else False,
+    file_dir: str = actions.file_dir if configured == True else ""
+):
+    configurator.main(release, format, media, limit, freeleech, file_dir)    
 
 @app.command()
 def search(
         artist: str = typer.Argument(...),
         album: Optional[str] = typer.Option(None),
-        release: Optional[List[str]] = typer.Option(c.release_list if configured == False else actions.default_release, help="possible release types:"),
-        media: Optional[List[str]] = typer.Option(c.media_list if configured == False else actions.default_media, help="possible media types:"),
-        format: Optional[List[str]] = typer.Option(c.format_list if configured == False else actions.default_format, help="possible formats:")
+        release: Optional[List[str]] = typer.Option(c.release_list if configured == False else actions.default_release),
+        media: Optional[List[str]] = typer.Option(c.media_list if configured == False else actions.default_media),
+        format: Optional[List[str]] = typer.Option(c.format_list if configured == False else actions.default_format)
 ):
     actions.search(artist, release, media, format, album)
 
@@ -50,10 +63,10 @@ def download(
        fl: bool = typer.Option(freeleech)
 ):
     if configured == False:
-        console.print(colored("Please configure this system in order to download torrents.  Check the readme for more info.", "red"))
+        console.print(Text("Please run 'red.py configure' to configure your system.", style="red"))
         sys.exit()
     elif configured == True:
-        file_dir = data["file_dir"]
+        file_dir = actions.file_dir
         actions.torrent_download(file_dir, torrent_id, fl)
 
 @app.command()

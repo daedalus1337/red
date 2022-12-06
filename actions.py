@@ -3,11 +3,12 @@ import html
 import sys
 import const as c
 import os
-from termcolor import colored
 from rich.table import Table
 from dotenv import dotenv_values
 from rich.console import Console
+from rich.text import Text
 import json
+import configurator
 
 console = Console(highlight=False)
 
@@ -27,6 +28,12 @@ def load_config():
 		freeleech = data["freeleech"]
 		global file_dir
 		file_dir = data["file_dir"]
+
+def register_key():
+	api_key = input("Please enter your API key (or press Ctrl + C to exit): ")
+	f = open(".env", "w")
+	f.write(f"KEY='{api_key}'")
+	f.close()
 
 def make_request(params):
 	header = {"Authorization": dotenv_values(".env")["KEY"]}
@@ -79,28 +86,31 @@ def search(artist, releases, media, format, album=None):
 def stats():
 	stats_action = {"action": "index"}
 	r1 = make_request(stats_action).json()["response"]
-	t = Table(title=colored(r1["username"], "green"), show_header = False)
+	t = Table(title=Text(r1["username"], style="bold green"), show_header = False)
 	t.add_row("Class", r1["userstats"]["class"])
 	t.add_row("Ratio", str(r1["userstats"]["ratio"]))
 	t.add_row("Required Ratio", str(r1["userstats"]["requiredratio"]))
 	t.add_row("Upload", str(sizeof_fmt(r1["userstats"]["uploaded"])))
 	t.add_row("Download", str(sizeof_fmt(r1["userstats"]["downloaded"])))
-	t.add_row("Messages", str(colored(r1["notifications"]["messages"], "green") if r1["notifications"]["messages"] != 0 else r1["notifications"]["messages"]))
+	t.add_row("Messages", Text(str(r1["notifications"]["messages"]),style="green") if r1["notifications"]["messages"] != 0 else r1["notifications"]["messages"])
 	console.print(t)
 
 def inbox():
 	inbox_action = {"action": "inbox"}
 	r1 = make_request(inbox_action).json()["response"]
-	t = Table("Sender", "Subject", "Message ID", title=colored("Inbox", "green"))
+	t = Table("Sender", "Subject", "Message ID", title="Inbox")
 	for item in r1["messages"]:
 		if item["senderId"] == 0:
 			sender = "SYSTEM"
 		else:
 			sender = html.unescape(item["username"])
 		subject = html.unescape(item["subject"])
+		messageId = str(item["convId"])
 		if item["unread"] == True:
-			subject = colored("*", "green") + " " + subject
-		t.add_row(sender, subject, str(item["convId"]))
+			sender = Text(sender, style="green")
+			subject = Text(subject, style="green")
+			messageId = Text(str(item["convId"]), style="green")
+		t.add_row(sender, subject, messageId)
 	console.print(t)
 
 def torrent_download(dir, torrentid, fl):
@@ -110,7 +120,7 @@ def torrent_download(dir, torrentid, fl):
 	artist = html.unescape(str((r1.json()["response"]["group"]["musicInfo"]["artists"][0]["name"])))
 	download_action = {"action": "download", "id": torrentid, "usetoken": int(fl)} if fl == True else {"action": "download", "id": torrentid}
 	r2 = make_request(download_action)
-	path = dir + artist + " - " + album + ".torrent"
+	path = dir + html.unescape(artist) + " - " + html.unescape(album.replace("/","_")) + ".torrent"
 	open(path, "wb").write(r2.content)
 	console.print(f"Torrent for {artist} - {album} was successfully downloaded!")
 
@@ -141,5 +151,3 @@ def read(message_id):
 	for item in r1["messages"]:
 		t.add_row(item["senderName"], html.unescape(item["bbBody"]))
 	console.print(t)
-
-# def configurator():
