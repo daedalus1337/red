@@ -1,30 +1,42 @@
 import actions
-import os
-import json
 import const as c
 import typer
 from typing import List, Optional
+from rich.console import Console
+import sys
+from termcolor import colored
+import os
 
-filename = os.path.join(os.path.dirname(__file__), 'config.json')
-with open(filename) as jsonfile:
-    data = json.load(jsonfile)
+console = Console(highlight=False)
 
-file_dir = data['file_dir']
-default_release = data['defaults']['release']
-default_media = data['defaults']['media']
-default_format = data['defaults']['format']
-freeleech = data['freeleech']
-toplist_limit = data['toplist_limit']
+freeleech = False
+toplist_limit = 10
 
 app = typer.Typer()
+
+try:
+    config = actions.load_config()
+    configured = True
+except Exception:
+    configured = False
+
+if os.path.isfile(".env"):
+    pass
+else:
+    console.print(colored("Tihs is likely your first run, as you have not registered your API key.", "red"))
+    api_key = input("Please enter your API key (or press Ctrl + C to exit): ")
+    f = open(".env", "w")
+    f.write(f"KEY='{api_key}'")
+    f.close()
+    
 
 @app.command()
 def search(
         artist: str = typer.Argument(...),
         album: Optional[str] = typer.Option(None),
-        release: Optional[List[str]] = typer.Option(default_release, help="possible release types:"),
-        media: Optional[List[str]] = typer.Option(default_media, help="possible media types:"),
-        format: Optional[List[str]] = typer.Option(default_format, help="possible formats:")
+        release: Optional[List[str]] = typer.Option(c.release_list if configured == False else actions.default_release, help="possible release types:"),
+        media: Optional[List[str]] = typer.Option(c.media_list if configured == False else actions.default_media, help="possible media types:"),
+        format: Optional[List[str]] = typer.Option(c.format_list if configured == False else actions.default_format, help="possible formats:")
 ):
     actions.search(artist, release, media, format, album)
 
@@ -34,17 +46,22 @@ def stats():
 
 @app.command()
 def download(
-        torrent_id: int = typer.Argument(...),
-        fl: bool = typer.Option(False, freeleech)
+       torrent_id: int = typer.Argument(...),
+       fl: bool = typer.Option(freeleech)
 ):
-    actions.torrent_download(file_dir, torrent_id, fl)
+    if configured == False:
+        console.print(colored("Please configure this system in order to download torrents.  Check the readme for more info.", "red"))
+        sys.exit()
+    elif configured == True:
+        file_dir = data["file_dir"]
+        actions.torrent_download(file_dir, torrent_id, fl)
 
 @app.command()
 def top():
-    print("choose a list")
+    console.print("choose a list")
     n = 1
     for i in c.top_lists:
-        print(str(n) + ") " + c.top_lists[i])
+        console.print(str(n) + ") " + c.top_lists[i])
         n += 1
     list = int(input("Enter a number:"))
     actions.top(list, toplist_limit)

@@ -2,14 +2,27 @@ import requests
 import html
 import sys
 import const as c
-from prettytable import PrettyTable, ALL
 import os
 from termcolor import colored
 from rich.table import Table
 from dotenv import dotenv_values
 from rich.console import Console
+import json
 
 console = Console(highlight=False)
+
+def load_config():
+	filename = os.path.join(os.path.dirname(__file__), 'config.json')
+	with open(filename) as jsonfile:
+		data = json.load(jsonfile)
+		global default_release
+		default_release = data["defaults"]["release"]
+		global default_media
+		default_media = data["defaults"]["media"]
+		global default_format
+		default_format = data["defaults"]["format"]
+		global toplist_limit
+		toplist_limit = data["toplist_limit"]
 
 def make_request(params):
 	header = {"Authorization": dotenv_values(".env")["KEY"]}
@@ -20,14 +33,12 @@ def make_request(params):
 		sys.exit()
 	return req
 
-
 def sizeof_fmt(num, suffix="B"):
 	for unit in ["","K","M","G","T","P","E","Z"]:
 		if abs(num) < 1024.0:
 			return "%3.1f%s%s" % (num, unit, suffix)
 		num /= 1024.0
 	return "%.1f%s%s" % (num, "Yi", suffix)
-
 
 def print_album_info(release):
 	console.print("Torrent ID: " + str(release["torrentId"]) if "torrentId" in release else "Torrent ID: " + str(release["id"]))
@@ -42,38 +53,24 @@ def print_album_info(release):
 
 def search(artist, releases, media, format, album=None):
 	if album:
-		artist_action = {"action": "artist", "artistname": artist.lower()}
+		artist_action = {"action": "artist", "artistname": artist}
 		r1 = make_request(artist_action).json()["response"]
 		for group in r1["torrentgroup"]:
 			if html.unescape(group["groupName"].lower()) == album.lower():
 				group_action = {"action": "torrentgroup", "id": str(group["groupId"])}
 				r2 = make_request(group_action).json()["response"]
 				for release in r2["torrents"]:
-					if format is None and media is None:
-						print_album_info(release)
-					elif media is None and format is not None:
-						if release["format"].lower() in format:
-							print_album_info(release)
-					elif format is None and media is not None:
-						if release["media"].lower() in media:
-							print_album_info(release)
-					elif release["format"].lower() in format and release["media"].lower() in media:
+					if release["format"] in format and release["media"] in media:
 						print_album_info(release)
 	else:
-		action = {"action": "artist", "artistname": artist.lower()}
+		action = {"action": "artist", "artistname": artist}
 		r1 = make_request(action).json()["response"]
-		if releases is None:
+		for release in releases:
 			for group in r1["torrentgroup"]:
-				console.print("Release name: " + html.unescape(group["groupName"]))
-				console.print("Release type: " + c.releases[group["releaseType"]])
-				console.print("")
-		elif releases is not None:
-			for release in releases:
-				for group in r1["torrentgroup"]:
-					if c.releases[group["releaseType"]].lower() == release:
-						console.print("Release name: " + html.unescape(group["groupName"]))
-						console.print("Release type: " + c.releases[group["releaseType"]])
-						console.print("")
+				if c.releases[group["releaseType"]] == release:
+					console.print("Release name: " + html.unescape(group["groupName"]))
+					console.print("Release type: " + c.releases[group["releaseType"]])
+					console.print("")
 
 def stats():
 	stats_action = {"action": "index"}
@@ -105,8 +102,8 @@ def inbox():
 def torrent_download(dir, torrentid, fl):
 	torrent_action = {"action": "torrent", "id": torrentid}
 	r1 = make_request(torrent_action)
-	album = r1.json()["response"]["group"]["name"]
-	artist = str((r1.json()["response"]["group"]["musicInfo"]["artists"][0]["name"]))
+	album = html.unescape(r1.json()["response"]["group"]["name"])
+	artist = html.unescape(str((r1.json()["response"]["group"]["musicInfo"]["artists"][0]["name"])))
 	download_action = {"action": "download", "id": torrentid, "usetoken": int(fl)} if fl == True else {"action": "download", "id": torrentid}
 	r2 = make_request(download_action)
 	path = dir + artist + " - " + album + ".torrent"
@@ -124,9 +121,9 @@ def top(list, toplist_limit):
 			n = 1
 			for r in item["results"]:
 				if r["artist"] == False:
-					console.print(str(n) + ") " + r["groupName"])
+					console.print(str(n) + ") " + html.unescape(r["groupName"]))
 				else:
-					console.print(str(n) + ") " + str(r["artist"]) + " - " + str(r["groupName"]))
+					console.print(str(n) + ") " + html.unescape(str(r["artist"])) + " - " + html.unescape(str(r["groupName"])))
 				print_album_info(r)
 				n += 1
 
@@ -140,3 +137,5 @@ def read(message_id):
 	for item in r1["messages"]:
 		t.add_row(item["senderName"], html.unescape(item["bbBody"]))
 	console.print(t)
+
+# def configurator():
