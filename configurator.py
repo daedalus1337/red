@@ -32,21 +32,21 @@ def main(release, format, media, limit, freeleech, file_dir):
 
 
     release_selection = inquirer.checkbox(
-        message="Select the releases you wish to see by default:\n(Press space to toggle one; Press Ctrl+a to toggle all)",
+        message="Select the releases you wish to see by default:\n(Press space to toggle one; Press ctrl+a to toggle all)",
         choices=question1_choice,
         validate=lambda result: len(result) >= 1,
         invalid_message="should be at least 1 selection",
         instruction="(select at least 1)",
     ).execute()
     format_selection = inquirer.checkbox(
-        message="Select the formats you wish to see by default:\n(Press space to toggle one; Press Ctrl+a to toggle all)",
+        message="Select the formats you wish to see by default:\n(Press space to toggle one; Press ctrl+a to toggle all)",
         choices=question2_choice,
         validate=lambda result: len(result) >= 1,
         invalid_message="should be at least 1 selection",
         instruction="(select at least 1)",
     ).execute()
     media_selection = inquirer.checkbox(
-        message="Select the media types you wish to see by default:\n(Press space to toggle one; Press Ctrl+a to toggle all)",
+        message="Select the media types you wish to see by default:\n(Press space to toggle one; Press ctrl+a to toggle all)",
         choices=question3_choice,
         validate=lambda result: len(result) >= 1,
         invalid_message="should be at least 1 selection",

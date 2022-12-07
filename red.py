@@ -33,6 +33,10 @@ else:
     actions.register_key()
 
 @app.command()
+def key():
+    actions.register_key()
+
+@app.command()
 def configure(
     format: Optional[List[str]] = actions.default_format if configured == True else [],
     media: Optional[List[str]] = actions.default_media if configured == True else [],
