@@ -92,7 +92,7 @@ def stats():
 	t.add_row("Required Ratio", str(r1["userstats"]["requiredratio"]))
 	t.add_row("Upload", str(sizeof_fmt(r1["userstats"]["uploaded"])))
 	t.add_row("Download", str(sizeof_fmt(r1["userstats"]["downloaded"])))
-	t.add_row("Messages", Text(str(r1["notifications"]["messages"]),style="green") if r1["notifications"]["messages"] != 0 else r1["notifications"]["messages"])
+	t.add_row("Messages", Text(str(r1["notifications"]["messages"]),style="green") if r1["notifications"]["messages"] != 0 else str(r1["notifications"]["messages"]))
 	console.print(t)
 
 def inbox():
