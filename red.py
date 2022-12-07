@@ -1,80 +1,97 @@
 import actions
-import argparse
+import const as c
+import typer
+from typing import List, Optional
+from rich.console import Console
+from rich.text import Text
+from dotenv import dotenv_values
 import sys
 import os
-import json
-import const as c
+import configurator
 
-filename = os.path.join(os.path.dirname(__file__), 'config.json')
-with open(filename) as jsonfile:
-	data = json.load(jsonfile)
+console = Console(highlight=False)
 
-api_key = data['key']
-file_dir = data['file_dir']
-default_release = data['defaults']['release']
-default_media = data['defaults']['media']
-default_format = data['defaults']['format']
-freeleech = data['freeleech']
-toplist_limit = data['toplist_limit']
-header = {"Authorization": api_key}
+freeleech = False
+toplist_limit = 10
 
-parser = argparse.ArgumentParser()
-subparsers = parser.add_subparsers(help="Functions")
-parser_1 = subparsers.add_parser("search", help='artist/album search')
-parser_1.add_argument("artist", type=str, help='artist name')
-parser_1.add_argument("-r", help="releases", nargs="+", default=default_release)
-parser_1.add_argument("album", type=str, help='album name', nargs="?")
-parser_1.add_argument("-m", help="possible media types: cd, dvd, vinyl, soundboard, sacd, dat, cassette, web, blu-ray", nargs="+", default=default_media)
-parser_1.add_argument("-f", help="possible formats: flac, mp3, aac, ac3, dts", nargs="+", default=default_format)
-parser_1.set_defaults(command="search")
-
-parser_2 = subparsers.add_parser("stats", help="show your RED user stats")
-parser_2.add_argument("stats", action="store_true", help="show your RED user stats")
-parser_2.set_defaults(command="stats")
-
-parser_3 = subparsers.add_parser("download", help="download a torrent")
-parser_3.add_argument("torrentid", type=int, help="torrent ID found in album search")
-parser_3.add_argument("-fl", action="store_true", default=freeleech)
-parser_3.set_defaults(command="download")
-
-parser_4 = subparsers.add_parser("top", help="shows the top torrents")
-parser_4.add_argument("top", action="store_true", help="shows the top torrents")
-parser_4.set_defaults(command="top")
-
-parser_5 = subparsers.add_parser("inbox", help="shows your messages")
-parser_5.add_argument("inbox", action="store_true", help="shows your messages")
-parser_5.set_defaults(command="inbox")
-
-parser_6 = subparsers.add_parser("read", help="read a message")
-parser_6.add_argument("messageId", type=int, help="read a message")
-parser_6.set_defaults(command="read")
-
-args = parser.parse_args()
+app = typer.Typer()
 
 try:
-    args.command
-except:
-    parser.print_help()
-    sys.exit(0)
+    config = actions.load_config()
+    configured = True
+except Exception:
+    configured = False
 
-if args.command.lower() == "search":
-	if args.album == None:
-		actions.artist_search(args, header)
-	if args.album != None:
-		actions.album_search(args, header)
-if args.command.lower() == "stats":
-    actions.user_stats(header)
-if args.command.lower() == "download":
-	actions.torrent_download(args,file_dir, header)
-if args.command.lower() == "top":
-	print("choose a list")
-	n = 1
-	for i in c.top_lists:
-		print(str(n) + ") " + c.top_lists[i])
-		n += 1
-	list = int(input("Enter a number:"))
-	actions.top(header, list, toplist_limit)
-if args.command.lower() == "inbox":
-	actions.inbox(header)
-if args.command.lower() == "read":
-	actions.read(header, args)
+if os.path.isfile(".env"):
+    if len(dotenv_values(".env")["KEY"]) > 1 and type(dotenv_values(".env")["KEY"]) == str:
+        pass
+    else:
+        console.print(Text("Please register your API key", style="red"))
+        actions.register_key()
+else:
+    console.print(Text("Tihs is likely your first run, as you have not registered your API key.", style="red"))
+    actions.register_key()
+
+@app.command()
+def key():
+    actions.register_key()
+
+@app.command()
+def configure(
+    format: Optional[List[str]] = actions.default_format if configured == True else [],
+    media: Optional[List[str]] = actions.default_media if configured == True else [],
+    release: Optional[List[str]] = actions.default_release if configured == True else [],
+    limit: int = actions.toplist_limit if configured == True else 10,
+    freeleech: bool = actions.freeleech if configured == True else False,
+    file_dir: str = actions.file_dir if configured == True else ""
+):
+    configurator.main(release, format, media, limit, freeleech, file_dir)    
+
+@app.command()
+def search(
+        artist: str = typer.Argument(...),
+        album: Optional[str] = typer.Option(None),
+        release: Optional[List[str]] = typer.Option(c.release_list if configured == False else actions.default_release),
+        media: Optional[List[str]] = typer.Option(c.media_list if configured == False else actions.default_media),
+        format: Optional[List[str]] = typer.Option(c.format_list if configured == False else actions.default_format)
+):
+    actions.search(artist, release, media, format, album)
+
+@app.command()
+def stats():
+    actions.stats()
+
+@app.command()
+def download(
+       torrent_id: int = typer.Argument(...),
+       fl: bool = typer.Option(freeleech)
+):
+    if configured == False:
+        console.print(Text("Please run 'red.py configure' to configure your system.", style="red"))
+        sys.exit()
+    elif configured == True:
+        file_dir = actions.file_dir
+        actions.torrent_download(file_dir, torrent_id, fl)
+
+@app.command()
+def top():
+    console.print("choose a list")
+    n = 1
+    for i in c.top_lists:
+        console.print(str(n) + ") " + c.top_lists[i])
+        n += 1
+    list = int(input("Enter a number:"))
+    actions.top(list, toplist_limit)
+
+@app.command()
+def inbox():
+    actions.inbox()
+
+@app.command()
+def read(
+    message_id: str = typer.Argument(...)
+):
+    actions.read(message_id)
+
+if __name__ == "__main__":
+    app()
