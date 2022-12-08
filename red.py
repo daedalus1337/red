@@ -4,7 +4,6 @@ import typer
 from typing import List, Optional
 from rich.console import Console
 from rich.text import Text
-from dotenv import dotenv_values
 import sys
 import os
 import configurator
@@ -22,15 +21,7 @@ try:
 except Exception:
     configured = False
 
-if os.path.isfile(".env"):
-    if len(dotenv_values(".env")["KEY"]) > 1 and type(dotenv_values(".env")["KEY"]) == str:
-        pass
-    else:
-        console.print(Text("Please register your API key", style="red"))
-        actions.register_key()
-else:
-    console.print(Text("Tihs is likely your first run, as you have not registered your API key.", style="red"))
-    actions.register_key()
+actions.check_env()
 
 @app.command()
 def key():
