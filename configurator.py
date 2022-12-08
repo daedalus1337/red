@@ -3,6 +3,7 @@ from InquirerPy.base.control import Choice
 from InquirerPy.validator import PathValidator
 import json
 import const as c
+import actions as a
 
 def main(release, format, media, limit, freeleech, file_dir):
 
@@ -79,7 +80,7 @@ def main(release, format, media, limit, freeleech, file_dir):
     elif dest_path[-1] != "/":
         c.config_json["file_dir"] = dest_path + "/"
 
-    with open("config.json", "w") as f:
+    with open(a.config_path, "w") as f:
         json.dump(c.config_json, f, indent=4)
 
 if __name__ == "__main__":

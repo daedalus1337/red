@@ -12,9 +12,23 @@ import configurator
 
 console = Console(highlight=False)
 
+def check_env():
+	global env_path
+	env_path = os.path.join(os.path.dirname(__file__), ".env")
+	if os.path.isfile(env_path):
+		if len(dotenv_values(env_path)["KEY"]) > 1 and type(dotenv_values(env_path)["KEY"]) == str:
+			pass
+		else:
+			console.print(Text("Please register your API key", style="red"))
+			register_key()
+	else:
+		console.print(Text("This is likely your first run, as you have not registered your API key.", style="red"))
+		register_key()
+
 def load_config():
-	filename = os.path.join(os.path.dirname(__file__), 'config.json')
-	with open(filename) as jsonfile:
+	global config_path
+	config_path = os.path.join(os.path.dirname(__file__), 'config.json')
+	with open(config_path) as jsonfile:
 		data = json.load(jsonfile)
 		global default_release
 		default_release = data["defaults"]["release"]
@@ -31,12 +45,12 @@ def load_config():
 
 def register_key():
 	api_key = input("Please enter your API key (or press Ctrl + C to exit): ")
-	f = open(".env", "w")
+	f = open(env_path, "w")
 	f.write(f"KEY='{api_key}'")
 	f.close()
 
 def make_request(params):
-	header = {"Authorization": dotenv_values(".env")["KEY"]}
+	header = {"Authorization": dotenv_values(env_path)["KEY"]}
 	req = requests.get(c.url, params=params, headers=header)
 	if req.status_code != 200:
 		console.print(f"Status of request is {req.status_code}. Aborting...")
