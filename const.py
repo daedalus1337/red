@@ -54,7 +54,7 @@ top_lists = {
 
 top_list_count = [10,100,250]
 
-url = "https://redacted.ch/ajax.php?"
+url = "https://redacted.sh/ajax.php?"
 
 config_json = { 
     "file_dir": "/absolute/path/to/download/location",
